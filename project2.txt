@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Result Processing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 850px;
+      margin-top: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2575fc;
+      margin-bottom: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #2575fc;
+      outline: none;
+    }
+
+    button {
+      background: #2575fc;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 15px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1d5de7;
+    }
+
+    .clear-btn {
+      background: #ff4d4d;
+      margin-left: 10px;
+    }
+
+    .clear-btn:hover {
+      background: #d43c3c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+    th {
+      background-color: #2575fc;
+      color: white;
+    }
+
+    td button {
+      padding: 6px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .edit-btn {
+      background-color: #ffa502;
+    }
+
+    .delete-btn {
+      background-color: #ff4757;
+    }
+
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fa-solid fa-user-graduate"></i> Student Result Management</h1>
+
+    <div class="form-grid">
+      <div>
+        <label><i class="fa-solid fa-user icon"></i> Name:</label>
+        <input type="text" id="name" placeholder="Enter student name">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-id-badge icon"></i> Roll No:</label>
+        <input type="text" id="roll" placeholder="Enter roll number">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-calculator icon"></i> Maths Marks:</label>
+        <input type="number" id="maths" placeholder="Enter marks in Maths">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-flask icon"></i> Science Marks:</label>
+        <input type="number" id="science" placeholder="Enter marks in Science">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-book icon"></i> English Marks:</label>
+        <input type="number" id="english" placeholder="Enter marks in English">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-calendar-check icon"></i> Days Present:</label>
+        <input type="number" id="presentDays" placeholder="Days present">
+      </div>
+      <div>
+        <label><i class="fa-solid fa-calendar-days icon"></i> Total Working Days:</label>
+        <input type="number" id="totalDays" placeholder="Total working days">
+      </div>
+    </div>
+
+    <button onclick="saveStudent()">Save Student</button>
+    <button class="clear-btn" onclick="clearAll()">Clear All</button>
+
+    <h2 style="text-align:center; margin-top:25px; color:#2575fc;">All Student Records</h2>
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Roll</th>
+          <th>Total</th>
+          <th>%</th>
+          <th>Grade</th>
+          <th>Result</th>
+          <th>Attendance %</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <footer>© 2025 Student Result Management | Designed by Sangram</footer>
+  </div>
+
+  <script>
+    let editIndex = null;
+
+    function calculateGrade(percentage) {
+      if (percentage >= 75) return 'A';
+      if (percentage >= 60) return 'B';
+      if (percentage >= 50) return 'C';
+      if (percentage >= 40) return 'D';
+      return 'F';
+    }
+
+    function calculateResult(percentage) {
+      return percentage >= 40 ? 'PASS' : 'FAIL';
+    }
+
+    function saveStudent() {
+      const name = document.getElementById("name").value.trim();
+      const roll = document.getElementById("roll").value.trim();
+      const maths = parseFloat(document.getElementById("maths").value);
+      const science = parseFloat(document.getElementById("science").value);
+      const english = parseFloat(document.getElementById("english").value);
+      const presentDays = parseFloat(document.getElementById("presentDays").value);
+      const totalDays = parseFloat(document.getElementById("totalDays").value);
+
+      if (!name || !roll || isNaN(maths) || isNaN(science) || isNaN(english) || isNaN(presentDays) || isNaN(totalDays) || totalDays <= 0) {
+        alert("⚠️ Please fill all fields correctly!");
+        return;
+      }
+
+      const total = maths + science + english;
+      const percentage = total / 3;
+      const attendance = (presentDays / totalDays) * 100;
+      const grade = calculateGrade(percentage);
+      const result = calculateResult(percentage);
+
+      const student = { name, roll, total, percentage, grade, result, attendance };
+
+      let students = JSON.parse(localStorage.getItem("students")) || [];
+
+      if (editIndex !== null) {
+        students[editIndex] = student;
+        editIndex = null;
+      } else {
+        students.push(student);
+      }
+
+      localStorage.setItem("students", JSON.stringify(students));
+      clearForm();
+      loadStudents();
+    }
+
+    function loadStudents() {
+      const tbody = document.querySelector("#studentTable tbody");
+      tbody.innerHTML = "";
+      const students = JSON.parse(localStorage.getItem("students")) || [];
+
+      students.forEach((s, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.roll}</td>
+          <td>${s.total}</td>
+          <td>${s.percentage.toFixed(2)}%</td>
+          <td>${s.grade}</td>
+          <td class="${s.result === 'PASS' ? 'pass' : 'fail'}">${s.result}</td>
+          <td>${s.attendance.toFixed(2)}%</td>
+          <td>
+            <button class="edit-btn" onclick="editStudent(${index})"><i class="fa-solid fa-pen"></i></button>
+            <button class="delete-btn" onclick="deleteStudent(${index})"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editStudent(index) {
+      const students = JSON.parse(localStorage.getItem("students")) || [];
+      const s = students[index];
+      document.getElementById("name").value = s.name;
+      document.getElementById("roll").value = s.roll;
+      document.getElementById("maths").value = s.total / 3; // approximate split
+      document.getElementById("science").value = s.total / 3;
+      document.getElementById("english").value = s.total / 3;
+      editIndex = index;
+    }
+
+    function deleteStudent(index) {
+      if (confirm("Are you sure you want to delete this record?")) {
+        let students = JSON.parse(localStorage.getItem("students")) || [];
+        students.splice(index, 1);
+        localStorage.setItem("students", JSON.stringify(students));
+        loadStudents();
+      }
+    }
+
+    function clearForm() {
+      document.querySelectorAll("input").forEach(i => i.value = "");
+    }
+
+    function clearAll() {
+      if (confirm("Delete all student records?")) {
+        localStorage.removeItem("students");
+        loadStudents();
+      }
+    }
+
+    window.onload = loadStudents;
+  </script>
+</body>
+</html>
